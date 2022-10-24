@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.module.mapper.ScoreMapper">
+    
+    <resultMap type="com.module.pojo.Score" id="ScoreResult">
+        <result property="id" column="id" />
+        <result property="assessid" column="assessid" />
+        <result property="score" column="score" />
+        <result property="studentid" column="studentid" />
+        <association property="assess" column="assessid" select="com.module.mapper.AssessMapper.selectAssessById"></association>
+    </resultMap>
+    
+    
+    <select id="selectScoreList" parameterType="com.module.pojo.Score" resultMap="ScoreResult">
+        select s.id,s.assessid,s.score,s.studentid from score s 
+        <where>  
+        </where>
+    </select>
+    <select id="selectScoreById" parameterType="Integer" resultMap="ScoreResult">
+        select s.* 
+		from score s 
+        where s.id = #{id}
+    </select>
+
+    <select id="selectScoreAssessId" parameterType="Integer" resultMap="ScoreResult">
+        select s.*
+		from score s
+        where s.studentid = #{studentId} and s.assessid = #{assessId}
+    </select>
+
+    <select id="selectScoreByAssessId" parameterType="Integer" resultType="double">
+        select avg(score)
+		from score
+        where assessid = #{value}
+    </select>
+    <select id="selectAll" resultMap="ScoreResult">
+        select s.* 
+		from score s
+		<where>
+            <if test="studentId != null and studentId != 0">
+                and s.studentid = #{studentId}
+            </if>
+        </where>
+    </select>
+    <insert id="insertScore" parameterType="com.module.pojo.Score" useGeneratedKeys="true" keyProperty="id">
+        insert into score (
+			<if test="assessid != null">assessid, </if> 
+			<if test="score != null">score, </if> 
+			<if test="studentid != null">studentid</if> 
+        )values(
+		<trim  prefixOverrides=",">
+			<if test="assessid != null ">#{assessid}, </if>
+			<if test="score != null">#{score}, </if>
+			<if test="studentid != null ">#{studentid}</if>
+			</trim>
+		)
+    </insert>
+
+    <insert id="batchAdd" parameterType="com.module.pojo.Score" useGeneratedKeys="true" keyProperty="id">
+        insert into score (
+assessid, score, studentid        )values
+        <foreach item="item" index="index" collection="list" separator=",">
+        (
+#{item.assessid}, #{item.score}, #{item.studentid}		)
+		</foreach>
+    </insert>
+    	 
+    <update id="updateScore" parameterType="com.module.pojo.Score">
+        update score 
+        <set>
+            <if test="assessid != null">assessid = #{assessid}, </if>
+            <if test="score != null">score = #{score}, </if>
+            <if test="studentid != null">studentid = #{studentid}</if>
+        </set>
+        where id = #{id}
+    </update>
+	
+    <update id="batchUpdate" parameterType="java.util.List">
+        update score 
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="status =case" suffix="end,">
+	            <foreach collection="list" item="item" index="index">
+            		<if test="assessid != null">when id=#{item.id} then #{assessid}</if>
+           			<if test="score != null">when id=#{item.id} then #{score}</if>
+            		<if test="studentid != null">when id=#{item.id} then #{studentid}</if>
+       		</foreach>
+        </trim>
+     </trim>
+     where id in
+     <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+         #{item.id,jdbcType=BIGINT}
+     </foreach>
+   </update>
+
+    <delete id="deleteScoreById" parameterType="Integer">
+        delete from score where id = #{value}
+    </delete>
+	
+    <delete id="batchDeleteScore" parameterType="Integer">
+        delete from score where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+        #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

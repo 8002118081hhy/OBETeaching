@@ -1,0 +1,137 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>编辑考核方案</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="${ctx}/static/layui/css/layui.css" media="all"/>
+    <script>
+        var ctx = "${ctx}";  //全局js项目路径
+    </script>
+    <style type="text/css">
+        .layui-form-item .layui-inline {
+            width: 33.333%;
+            float: left;
+            margin-right: 0;
+        }
+
+        @media ( max-width: 1240px) {
+            .layui-form-item .layui-inline {
+                width: 100%;
+                float: none;
+            }
+        }
+    </style>
+</head>
+<body class="childrenBody">
+<form class="layui-form layui-form-pane" action="" style="width:80%;margin:0 auto;margin-top: 2%;"
+      id="saveAssessForm"
+      onsubmit="return false;">
+    <input type="hidden" value="${assess.id}" name="id">
+    <div class="layui-form-item ">
+        <label class="layui-form-label">考核方案</label>
+        <div class="layui-input-block">
+            <input type="text" id="name" name="name" lay-verify="required"
+                   placeholder="请输入考核方案"
+                   value="${assess.name}" class="layui-input"/>
+        </div>
+    </div>
+    <div class="layui-form-item " style="display: none">
+        <label class="layui-form-label">课程目标</label>
+        <div class="layui-input-block">
+            <input type="text" id="middleid" name="middleid" lay-verify="required"
+                   placeholder="请输入课程目标"
+                   value="${middleId!=null?middleId:assess.middleid}" class="layui-input"/>
+        </div>
+    </div>
+    <div class="layui-form-item ">
+        <label class="layui-form-label">考核满分</label>
+        <div class="layui-input-block">
+            <input type="text" id="fullmark" name="fullmark" lay-verify="required"
+                   placeholder="请输入考核满分"
+                   value="${assess.fullmark}" class="layui-input"/>
+        </div>
+    </div>
+    <div class="layui-form-item ">
+        <label class="layui-form-label">考核权重</label>
+        <div class="layui-input-block">
+            <input type="text" id="weight" name="weight" lay-verify="required"
+                   placeholder="请输入考核权重"
+                   value="${assess.weight}" class="layui-input"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="saveAssess">立即保存</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                <button onclick="backPage()" class="layui-btn layui-btn-warm">返回</button>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript" src="${ctx}/static/layui/layui.js"></script>
+<script type="text/javascript" src="${ctx}/static/js/common.js"></script>
+<script type="text/javascript">
+    var $;
+    var $form;
+    var form;
+    layui.config({
+        base: "js/"
+    }).use(['form', 'layer', 'jquery', 'laypage', 'table', 'laytpl', 'laydate'], function () {
+        var form = layui.form, table = layui.table;
+        layer = parent.layer === undefined ? layui.layer : parent.layer,
+            laypage = layui.laypage, laydate = layui.laydate,
+            $ = layui.jquery;
+        nowTime = new Date().valueOf();
+        //表单提交
+        form.on("submit(saveAssess)", function (data) {
+            //弹出loading
+            var index = top.layer.msg('数据提交中，请稍候', {icon: 16, time: false, shade: 0.8});
+            var msg;
+            var subURL = ctx + "/manage/saveAssess";//添加提交地址
+            if (!isEmpty(data.field.id)) { //判断是添加还是修改
+                subURL = ctx + "/manage/updateAssess";//修改提交地址
+            }
+            $.ajax({
+                type: "post",
+                url: subURL,
+                data: data.field,
+                dataType: "json",
+                success: function (d) {
+                    if (d.code == 0) {
+                        msg = d.msg;
+                        // 重置表单 saveAssessForm是表单的id
+                        //$("#saveAssessForm")[0].reset();
+                        //layui.form.render();
+                        layer.msg(msg, {time: 3000, icon: 1}, function () {
+                            var url = ctx + "/manage/assessList"; //返回列表页面
+                            if('${middleId}'){
+                                url = ctx + '/manage/assessList?id=${middleId}'
+                            }
+                            window.location.href = url;
+                        });
+                    } else {
+                        msg = d.msg;
+                        layer.alert(msg);
+                    }
+                }
+            });
+            return false;
+        })
+
+    });
+</script>
+</body>
+</html>

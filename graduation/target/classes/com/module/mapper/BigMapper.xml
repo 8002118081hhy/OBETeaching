@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace指定实现的接口类-->
+<mapper namespace="com.module.mapper.BigMapper">
+<!--    映射表-->
+    <resultMap type="com.module.pojo.Big" id="BigResult">
+        <result property="id" column="id" />
+        <result property="name" column="name" />
+    </resultMap>
+    
+<!--   id表示实现的方法名称 -->
+    <select id="selectBigList" parameterType="com.module.pojo.Big" resultMap="BigResult">
+        select s.id,s.name from big s 
+        <where>  
+        </where>
+    </select>
+    <select id="selectBigById" parameterType="Integer" resultMap="BigResult">
+        select s.* 
+		from big s 
+        where s.id = #{id}
+    </select>
+    <select id="selectAll" resultMap="BigResult">
+        select s.* 
+		from big s 
+    </select>
+    <insert id="insertBig" parameterType="com.module.pojo.Big" useGeneratedKeys="true" keyProperty="id">
+        insert into big (
+			<if test="name != null and name != '' ">name</if>
+        )values(
+		<trim  prefixOverrides=",">
+			<if test="name != null and name != ''">#{name}</if>
+			</trim>
+		)
+    </insert>
+
+    <insert id="batchAdd" parameterType="com.module.pojo.Big" useGeneratedKeys="true" keyProperty="id">
+        insert into big (
+name        )values
+        <foreach item="item" index="index" collection="list" separator=",">
+        (
+#{item.name}		)
+		</foreach>
+    </insert>
+    	 
+    <update id="updateBig" parameterType="com.module.pojo.Big">
+        update big 
+        <set>
+			<if test="name != null and name != ''">name = #{name}</if>
+        </set>
+        where id = #{id}
+    </update>
+	
+    <update id="batchUpdate" parameterType="java.util.List">
+        update big 
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="status =case" suffix="end,">
+	            <foreach collection="list" item="item" index="index">
+					<if test="name != null and name != ''">when id=#{item.id} then #{name}</if>
+       		</foreach>
+        </trim>
+     </trim>
+     where id in
+     <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+         #{item.id,jdbcType=BIGINT}
+     </foreach>
+   </update>
+
+    <delete id="deleteBigById" parameterType="Integer">
+        delete from big where id = #{value}
+    </delete>
+	
+    <delete id="batchDeleteBig" parameterType="Integer">
+        delete from big where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+        #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

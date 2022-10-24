@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.module.mapper.SubjectivityMapper">
+
+    <resultMap type="com.module.pojo.Subjectivity" id="SubjectivityResult">
+        <result property="id" column="id"/>
+        <result property="a1" column="a1"/>
+        <result property="a2" column="a2"/>
+        <result property="a3" column="a3"/>
+        <result property="a4" column="a4"/>
+        <result property="a5" column="a5"/>
+        <result property="bigid" column="bigid"/>
+        <result property="types" column="types"/>
+        <result property="studentid" column="studentid"></result>
+        <association property="small" column="bigid" select="com.module.mapper.SmallMapper.selectSmallById"></association>
+    </resultMap>
+
+
+    <select id="selectSubjectivityList" parameterType="com.module.pojo.Subjectivity" resultMap="SubjectivityResult">
+        select s.id,s.a1,s.a2,s.a3,s.a4,s.a5,s.bigid,s.types,s.studentid from subjectivity s
+    </select>
+    <select id="selectSubjectivityById" parameterType="Integer" resultMap="SubjectivityResult">
+        select s.* 
+		from subjectivity s 
+        where s.id = #{id}
+    </select>
+    <select id="selectAll" resultMap="SubjectivityResult">
+        select s.*
+        from subjectivity s
+        <where>
+            <if test="studentId!=null and studentId!=0">
+                s.studentid = #{studentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByBigId" resultMap="SubjectivityResult">
+        select s.*
+        from subjectivity s
+        where s.bigid = #{value}
+    </select>
+
+    <insert id="insertSubjectivity" parameterType="com.module.pojo.Subjectivity" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into subjectivity (
+        <if test="a1 != null">a1,</if>
+        <if test="a2 != null">a2,</if>
+        <if test="a3 != null">a3,</if>
+        <if test="a4 != null">a4,</if>
+        <if test="a5 != null">a5,</if>
+        <if test="bigid != null">bigid,</if>
+        <if test="types != null">types,</if>
+        <if test="studentid != null">studentid</if>
+        )values(
+        <trim prefixOverrides=",">
+            <if test="a1 != null">#{a1},</if>
+            <if test="a2 != null">#{a2},</if>
+            <if test="a3 != null">#{a3},</if>
+            <if test="a4 != null">#{a4},</if>
+            <if test="a5 != null">#{a5},</if>
+            <if test="bigid != null ">#{bigid},</if>
+            <if test="types != null ">#{types},</if>
+            <if test="studentid != null ">#{studentid}</if>
+        </trim>
+        )
+    </insert>
+
+    <insert id="batchAdd" parameterType="com.module.pojo.Subjectivity" useGeneratedKeys="true" keyProperty="id">
+        insert into subjectivity (
+        a1, a2, a3, a4, a5, bigid, types,studentid )values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (
+            #{item.a1}, #{item.a2}, #{item.a3}, #{item.a4}, #{item.a5}, #{item.bigid}, #{item.types},#{studentid} )
+        </foreach>
+    </insert>
+
+    <update id="updateSubjectivity" parameterType="com.module.pojo.Subjectivity">
+        update subjectivity
+        <set>
+            <if test="a1 != null">a1 = #{a1},</if>
+            <if test="a2 != null">a2 = #{a2},</if>
+            <if test="a3 != null">a3 = #{a3},</if>
+            <if test="a4 != null">a4 = #{a4},</if>
+            <if test="a5 != null">a5 = #{a5},</if>
+            <if test="bigid != null">bigid = #{bigid},</if>
+            <if test="types != null">types = #{types},</if>
+            <if test="studentid != null">studentid = #{studentid}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        update subjectivity
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="status =case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="a1 != null">when id=#{item.id} then #{a1}</if>
+                    <if test="a2 != null">when id=#{item.id} then #{a2}</if>
+                    <if test="a3 != null">when id=#{item.id} then #{a3}</if>
+                    <if test="a4 != null">when id=#{item.id} then #{a4}</if>
+                    <if test="a5 != null">when id=#{item.id} then #{a5}</if>
+                    <if test="bigid != null">when id=#{item.id} then #{bigid}</if>
+                    <if test="types != null">when id=#{item.id} then #{types}</if>
+                    <if test="studentid != null">when id=#{item.id} then #{studentid}</if>
+                </foreach>
+            </trim>
+        </trim>
+        where id in
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <delete id="deleteSubjectivityById" parameterType="Integer">
+        delete from subjectivity where id = #{value}
+    </delete>
+
+    <delete id="batchDeleteSubjectivity" parameterType="Integer">
+        delete from subjectivity where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

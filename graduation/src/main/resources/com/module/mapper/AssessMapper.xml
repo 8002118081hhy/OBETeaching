@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.module.mapper.AssessMapper">
+    
+    <resultMap type="com.module.pojo.Assess" id="AssessResult">
+        <result property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="middleid" column="middleid" />
+        <result property="weight" column="weight" />
+        <result property="fullmark" column="fullmark" />
+
+        <association property="middle" column="middleid" select="com.module.mapper.MiddleMapper.selectMiddleById"></association>
+    </resultMap>
+    
+    
+    <select id="selectAssessList" parameterType="com.module.pojo.Assess" resultMap="AssessResult">
+        select s.id,s.name,s.middleid,s.weight,s.fullmark from assess s
+    </select>
+
+    <select id="selectAssessByMiddleId" parameterType="com.module.pojo.Assess" resultMap="AssessResult">
+        select s.id,s.name,s.middleid,s.weight,s.fullmark from assess s
+        where s.middleid = #{middleId}
+    </select>
+    <select id="selectAssessById" parameterType="Integer" resultMap="AssessResult">
+        select s.* 
+		from assess s 
+        where s.id = #{id}
+    </select>
+    <select id="selectAll" resultMap="AssessResult">
+        select s.* 
+		from assess s
+		<where>
+            <if test="middleId!=null and middleId!=0">
+                and s.middleid = #{middleId}
+            </if>
+            <if test="studentId != null and studentId != 0 ">
+                and not exists (select 1 from score where s.id = score.assessid and score.studentid = #{studentId} )
+            </if>
+        </where>
+    </select>
+    <insert id="insertAssess" parameterType="com.module.pojo.Assess" useGeneratedKeys="true" keyProperty="id">
+        insert into assess (
+			<if test="name != null and name != '' ">name, </if>
+			<if test="middleid != null">middleid, </if> 
+			<if test="weight != null">weight,</if>
+			<if test="fullmark != null">fullmark</if>
+        )values(
+		<trim  prefixOverrides=",">
+			<if test="name != null and name != ''">#{name}, </if>
+			<if test="middleid != null ">#{middleid}, </if>
+			<if test="weight != null">#{weight},</if>
+			<if test="fullmark != null">#{fullmark}</if>
+			</trim>
+		)
+    </insert>
+
+    <insert id="batchAdd" parameterType="com.module.pojo.Assess" useGeneratedKeys="true" keyProperty="id">
+        insert into assess (
+name, middleid, weight,fullmark        )values
+        <foreach item="item" index="index" collection="list" separator=",">
+        (
+#{item.name}, #{item.middleid}, #{item.weight},#{item.fullmark}		)
+		</foreach>
+    </insert>
+    	 
+    <update id="updateAssess" parameterType="com.module.pojo.Assess">
+        update assess 
+        <set>
+			<if test="name != null and name != ''">name = #{name}, </if>
+            <if test="middleid != null">middleid = #{middleid}, </if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="fullmark != null">fullmark = #{fullmark}</if>
+        </set>
+        where id = #{id}
+    </update>
+	
+    <update id="batchUpdate" parameterType="java.util.List">
+        update assess 
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="status =case" suffix="end,">
+	            <foreach collection="list" item="item" index="index">
+					<if test="name != null and name != ''">when id=#{item.id} then #{name}</if>
+            		<if test="middleid != null">when id=#{item.id} then #{middleid}</if>
+           			<if test="weight != null">when id=#{item.id} then #{weight}</if>
+           			<if test="fullmark != null">when id=#{item.id} then #{fullmark}</if>
+       		</foreach>
+        </trim>
+     </trim>
+     where id in
+     <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+         #{item.id,jdbcType=BIGINT}
+     </foreach>
+   </update>
+
+    <delete id="deleteAssessById" parameterType="Integer">
+        delete from assess where id = #{value}
+    </delete>
+	
+    <delete id="batchDeleteAssess" parameterType="Integer">
+        delete from assess where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+        #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

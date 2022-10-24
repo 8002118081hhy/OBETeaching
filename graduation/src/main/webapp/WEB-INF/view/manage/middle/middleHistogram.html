@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>ECharts</title>
+  <!-- 引入刚刚下载的 ECharts 文件 -->
+  <script src="echarts.js"></script>
+</head>
+<body>
+<!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+<div id="main" style="width: 600px;height:400px;"></div>
+
+<script type="text/javascript">
+  // 基于准备好的dom，初始化echarts实例
+  var myChart = echarts.init(document.getElementById('main'));
+
+  // 指定图表的配置项和数据
+  var option = {
+    title: {
+      text: '课程目标达成情况' //设置图表标题
+    },
+    //color设置图形颜色,注意后面是个数组
+    color:['pink','red','green'],
+    //图表提示框组件
+    tooltip: {
+      trigger:'item'
+    },
+    //图例组件
+    legend: {
+      //series里面有了name值，则legend里面的data可以删掉
+      //data: ['销量']
+    },
+    //工具箱组件，可以另存为图片等功能
+    toolbox:{
+      feature:{
+        saveAsImage:{}
+      }
+    },
+    //网格配置，grid可以控制柱状图的图表大小
+    grid:{
+      left:'3%',
+      right:'4%',
+      bottom:'3%',
+      //是否显示刻度标签，如果是true就显示，否则不显示
+      containLabel:true
+    },
+    //设置X轴相关配置
+    xAxis: {
+      type:'category',
+      data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+    },
+    yAxis: {
+      type:'value',
+    },
+    //系列图表配置，决定显示那种类型的图表
+    //每一个{}决定一个柱条
+    series: [
+      {
+        name: '销量',
+        type: 'bar', //柱形图
+        data: [5, 20, 36, 10, 10, 20]
+      }
+    ]
+  };
+
+  // 使用刚指定的配置项和数据显示图表。
+  myChart.setOption(option);
+</script>
+</body>
+</html>

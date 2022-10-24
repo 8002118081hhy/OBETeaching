@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.module.mapper.StudentMapper">
+    
+    <resultMap type="com.module.pojo.Student" id="StudentResult">
+        <result property="id" column="id" />
+        <result property="realname" column="realname" />
+        <result property="gender" column="gender" />
+        <result property="birthday" column="birthday" />
+        <result property="grade" column="grade" />
+    </resultMap>
+    
+    
+    <select id="selectStudentList" parameterType="com.module.pojo.Student" resultMap="StudentResult">
+        select s.id,s.realname,s.gender,s.birthday,s.grade from student s 
+        <where>  
+        </where>
+    </select>
+    <select id="selectStudentById" parameterType="Integer" resultMap="StudentResult">
+        select s.* 
+		from student s 
+        where s.id = #{id}
+    </select>
+    <select id="selectAll" resultMap="StudentResult">
+        select s.* 
+		from student s
+		<where>
+            <if test="studentId!=null and studentId!=0">
+                and s.
+            </if>
+        </where>
+    </select>
+    <insert id="insertStudent" parameterType="com.module.pojo.Student" useGeneratedKeys="true" keyProperty="id">
+        insert into student (
+			<if test="realname != null and realname != '' ">realname, </if>
+			<if test="gender != null and gender != '' ">gender, </if>
+			<if test="birthday != null and birthday != '' ">birthday, </if>
+			<if test="grade != null and grade != '' ">grade</if>
+        )values(
+		<trim  prefixOverrides=",">
+			<if test="realname != null and realname != ''">#{realname}, </if>
+			<if test="gender != null and gender != ''">#{gender}, </if>
+			<if test="birthday != null and birthday != ''">#{birthday}, </if>
+			<if test="grade != null and grade != ''">#{grade}</if>
+			</trim>
+		)
+    </insert>
+
+    <insert id="batchAdd" parameterType="com.module.pojo.Student" useGeneratedKeys="true" keyProperty="id">
+        insert into student (
+realname, gender, birthday, grade        )values
+        <foreach item="item" index="index" collection="list" separator=",">
+        (
+#{item.realname}, #{item.gender}, #{item.birthday}, #{item.grade}		)
+		</foreach>
+    </insert>
+    	 
+    <update id="updateStudent" parameterType="com.module.pojo.Student">
+        update student 
+        <set>
+			<if test="realname != null and realname != ''">realname = #{realname}, </if>
+			<if test="gender != null and gender != ''">gender = #{gender}, </if>
+			<if test="birthday != null and birthday != ''">birthday = #{birthday}, </if>
+			<if test="grade != null and grade != ''">grade = #{grade}</if>
+        </set>
+        where id = #{id}
+    </update>
+	
+    <update id="batchUpdate" parameterType="java.util.List">
+        update student 
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="status =case" suffix="end,">
+	            <foreach collection="list" item="item" index="index">
+					<if test="realname != null and realname != ''">when id=#{item.id} then #{realname}</if>
+					<if test="gender != null and gender != ''">when id=#{item.id} then #{gender}</if>
+					<if test="birthday != null and birthday != ''">when id=#{item.id} then #{birthday}</if>
+					<if test="grade != null and grade != ''">when id=#{item.id} then #{grade}</if>
+       		</foreach>
+        </trim>
+     </trim>
+     where id in
+     <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+         #{item.id,jdbcType=BIGINT}
+     </foreach>
+   </update>
+
+    <delete id="deleteStudentById" parameterType="Integer">
+        delete from student where id = #{value}
+    </delete>
+	
+    <delete id="batchDeleteStudent" parameterType="Integer">
+        delete from student where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+        #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

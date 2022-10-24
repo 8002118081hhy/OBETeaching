@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.module.mapper.MiddleMapper">
+
+    <resultMap type="com.module.pojo.Middle" id="MiddleResult">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="smallid" column="smallid"/>
+        <result property="courseid" column="courseid"/>
+        <result property="w" column="w"/>
+        <result property="middleresult" column="middleresult"/>
+        <association property="small" column="smallid"
+                     select="com.module.mapper.SmallMapper.selectSmallById"></association>
+        <association property="course" column="courseid"
+                     select="com.module.mapper.CourseMapper.selectCourseById"></association>
+    </resultMap>
+
+
+    <resultMap type="com.module.pojo.Middle" id="MiddleResult2">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="smallid" column="smallid"/>
+        <result property="courseid" column="courseid"/>
+        <result property="w" column="w"/>
+        <result property="middleresult" column="middleresult"/>
+    </resultMap>
+
+    <select id="selectMiddleList" parameterType="com.module.pojo.Middle" resultMap="MiddleResult">
+        select s.id,s.name,s.smallid,s.courseid,s.w from middle s
+    </select>
+    <select id="selectMiddleById" parameterType="Integer" resultMap="MiddleResult">
+        select s.* 
+		from middle s 
+        where s.id = #{id}
+    </select>
+
+
+    <select id="selectMiddleBySmallId" parameterType="Integer" resultMap="MiddleResult">
+        select s.*
+		from middle s
+        where s.smallid = #{value}
+    </select>
+
+    <select id="selectMiddleByCS" parameterType="Integer" resultMap="MiddleResult2">
+        select s.*
+		from middle s
+        where s.courseid = #{courseId} and s.smallid = #{smallId}
+    </select>
+
+    <select id="selectMiddleByC" parameterType="Integer" resultMap="MiddleResult2">
+        select s.*
+        from middle s
+        where s.courseid = #{courseId}
+    </select>
+
+    <select id="selectAll" resultMap="MiddleResult">
+        select s.*
+        from middle s
+        <where>
+            <if test="courseId!=null and courseId !=0">
+                and s.courseid = #{courseId}
+            </if>
+        </where>
+    </select>
+    <insert id="insertMiddle" parameterType="com.module.pojo.Middle" useGeneratedKeys="true" keyProperty="id">
+        insert into middle (
+        <if test="name != null and name != '' ">name,</if>
+        <if test="smallid != null">smallid,</if>
+        <if test="courseid != null">courseid,</if>
+        <if test="w != null">w</if>
+        )values(
+        <trim prefixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="smallid != null ">#{smallid},</if>
+            <if test="courseid != null ">#{courseid},</if>
+            <if test="w != null ">#{w}</if>
+        </trim>
+        )
+    </insert>
+
+    <insert id="batchAdd" parameterType="com.module.pojo.Middle" useGeneratedKeys="true" keyProperty="id">
+        insert into middle (
+        name, smallid, courseid,w )values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (
+            #{item.name}, #{item.smallid}, #{item.courseid},#{item.w} )
+        </foreach>
+    </insert>
+
+    <update id="updateMiddle" parameterType="com.module.pojo.Middle">
+        update middle
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="smallid != null">smallid = #{smallid},</if>
+            <if test="courseid != null">courseid = #{courseid},</if>
+            <if test="w != null">w = #{w}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        update middle
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="status =case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="name != null and name != ''">when id=#{item.id} then #{name}</if>
+                    <if test="smallid != null">when id=#{item.id} then #{smallid}</if>
+                    <if test="courseid != null">when id=#{item.id} then #{courseid}</if>
+                </foreach>
+            </trim>
+        </trim>
+        where id in
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <delete id="deleteMiddleById" parameterType="Integer">
+        delete from middle where id = #{value}
+    </delete>
+
+    <delete id="batchDeleteMiddle" parameterType="Integer">
+        delete from middle where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
